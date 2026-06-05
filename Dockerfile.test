@@ -1,0 +1,26 @@
+# Image khusus untuk automated test (lint + unit) n8n MCP Server.
+#
+# Source di-COPY ke dalam image (BUKAN bind-mount). Konsekuensinya:
+#  - Test berjalan terisolasi; hasil sama di mesin developer manapun dan di CI.
+#  - Artefak test (__pycache__, .pytest_cache, .coverage) hidup di dalam container
+#    dan ikut terhapus saat `docker run --rm`. Folder project di host tetap bersih.
+#
+# Pin versi base image untuk menjamin parity lokal vs CI.
+FROM python:3.12-slim
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Install dependency aplikasi dari pyproject.toml lebih dulu (layer cache).
+COPY pyproject.toml README.md ./
+COPY src ./src
+RUN pip install --no-cache-dir .
+
+# Install tooling test (versi dipin di requirements-test.txt).
+COPY requirements-test.txt ./
+RUN pip install --no-cache-dir -r requirements-test.txt
+
+# Copy seluruh source termasuk tests/ (pengecualian diatur di Dockerfile.test.dockerignore).
+COPY . .

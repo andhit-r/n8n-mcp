@@ -1,0 +1,30 @@
+# .dockerignore khusus Dockerfile.test (BuildKit: Dockerfile.test.dockerignore menang atas .dockerignore).
+# Berbeda dari .dockerignore runtime: tests/ dan requirements-test.txt TIDAK dikecualikan.
+.git
+.gitignore
+.github
+
+# Artefak Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+dist/
+build/
+
+# Virtualenv lokal
+.venv/
+venv/
+env/
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store

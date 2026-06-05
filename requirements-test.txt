@@ -1,0 +1,9 @@
+# Pin tooling test — dipakai skill automated-test (Makefile + Dockerfile.test).
+# Jangan ganti versi sembarangan; pin agar lokal == CI.
+black==24.10.0
+isort==5.13.2
+ruff==0.8.6
+pytest==8.3.4
+pytest-asyncio==0.25.2
+respx==0.21.1
+httpx==0.28.1

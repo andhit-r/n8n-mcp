@@ -1,0 +1,30 @@
+# Jaga image runtime kecil & bersih.
+.git
+.gitignore
+.github
+.dockerignore
+Dockerfile
+Dockerfile.test
+Makefile
+
+# Test & artefak
+tests/
+requirements-test.txt
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Virtualenv & editor
+.venv/
+venv/
+env/
+.idea/
+.vscode/
+.DS_Store

@@ -1,0 +1,58 @@
+# Rilis project MCP: dipicu saat tag versi `v*` di-push.
+# Menghasilkan: (1) GitHub Release  dan  (2) Docker Image ke GHCR.
+#
+# Selaras dengan tagging semver dari skill git-workflow:
+#   git tag -a v1.0.0 -m "Rilis v1.0.0" && git push origin v1.0.0
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  github-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write          # diperlukan untuk membuat GitHub Release
+    steps:
+      - uses: actions/checkout@v4
+      - name: Buat GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true   # rangkum commit/PR sejak tag sebelumnya
+
+  docker-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write          # diperlukan untuk push image ke GHCR
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login ke GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tentukan tags & labels image
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest
+
+      - name: Build & push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
