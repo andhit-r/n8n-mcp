@@ -106,7 +106,7 @@ class AuthentikProvider(OAuthProxy):
         """
         access_token = idp_tokens.get("access_token", "")
         if not access_token:
-            raise TokenError("access_denied", "Upstream access token tidak tersedia")
+            raise TokenError("invalid_grant", "Upstream access token tidak tersedia")
 
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
@@ -117,23 +117,23 @@ class AuthentikProvider(OAuthProxy):
         except httpx.RequestError as exc:
             logger.warning("Gagal menghubungi Authentik userinfo: %s", exc)
             raise TokenError(
-                "server_error", "Tidak dapat memverifikasi identitas dari Authentik"
+                "invalid_request", "Tidak dapat memverifikasi identitas dari Authentik"
             ) from exc
 
         if response.status_code != 200:
             logger.warning("Authentik userinfo menolak token (status=%d)", response.status_code)
-            raise TokenError("access_denied", "Token Authentik tidak valid atau kedaluwarsa")
+            raise TokenError("invalid_grant", "Token Authentik tidak valid atau kedaluwarsa")
 
         userinfo = response.json()
         username: str = (
             (userinfo.get("preferred_username") or userinfo.get("sub", "")).lower().strip()
         )
         if not username:
-            raise TokenError("access_denied", "Tidak dapat mengambil username dari Authentik")
+            raise TokenError("invalid_grant", "Tidak dapat mengambil username dari Authentik")
 
         if self._allowed_usernames and username not in self._allowed_usernames:
             logger.warning("Akses ditolak untuk user Authentik '%s'", username)
-            raise TokenError("access_denied", f"User '{username}' tidak diizinkan")
+            raise TokenError("unauthorized_client", f"User '{username}' tidak diizinkan")
 
         logger.info("User Authentik '%s' berhasil diautentikasi", username)
         return {
