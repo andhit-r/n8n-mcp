@@ -10,9 +10,26 @@ Jalankan:
 
 import logging
 
+from starlette.applications import Starlette
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+from starlette.routing import Mount, Route
+
 from .server import mcp
 
 logger = logging.getLogger(__name__)
 
-app = mcp.http_app()
+
+async def health(request: Request) -> JSONResponse:
+    return JSONResponse({"status": "ok"})
+
+
+_mcp_app = mcp.http_app()
+
+app = Starlette(
+    routes=[
+        Route("/health", health),
+        Mount("/", app=_mcp_app),
+    ]
+)
 logger.info("ASGI app siap (Streamable HTTP)")

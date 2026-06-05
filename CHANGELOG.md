@@ -7,6 +7,12 @@ dan project ini mengikuti [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-06-05
+
+### Fixed
+- Tambah endpoint `/health` pada ASGI app agar Docker health check berhasil.
+  Sebelumnya container selalu berstatus `unhealthy` karena endpoint tidak ada.
+
 ## [0.1.1] - 2026-06-05
 
 ### Fixed
