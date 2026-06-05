@@ -7,6 +7,13 @@ dan project ini mengikuti [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-06-05
+
+### Fixed
+- `AUTHENTIK_ALLOWED_USERNAMES` gagal parse saat diisi plain string (mis. `akadmin`) atau
+  comma-separated (mis. `akadmin,user2`). Sebelumnya hanya menerima JSON array. Sekarang
+  ketiganya didukung: JSON array, comma-separated, dan nilai tunggal.
+
 ## [0.1.0] - 2026-06-05
 
 ### Added

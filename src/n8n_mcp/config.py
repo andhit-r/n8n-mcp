@@ -9,7 +9,10 @@ depannya dengan Authentik atau API key statis.
 
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings.sources.providers.env import EnvSettingsSource
 
 
 class Settings(BaseSettings):
@@ -34,6 +37,8 @@ class Settings(BaseSettings):
         authentik_client_secret: Client Secret dari Authentik OAuth2 Provider.
         authentik_allowed_usernames: Daftar ``preferred_username`` yang diizinkan
             (kosong = semua user yang lolos policy Authentik diizinkan).
+            Bisa berupa JSON array (``["alice","bob"]``), string comma-separated
+            (``alice,bob``), atau nilai tunggal (``alice``).
         mcp_api_key: API key statis untuk klien non-OAuth (VS Code/CLI).
     """
 
@@ -61,6 +66,27 @@ class Settings(BaseSettings):
 
     # API key (untuk VS Code / CLI / tools non-OAuth)
     mcp_api_key: str | None = None
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: type[BaseSettings],
+        init_settings: Any,
+        env_settings: Any,
+        dotenv_settings: Any,
+        file_secret_settings: Any,
+    ) -> tuple:
+        class _EnvSource(EnvSettingsSource):
+            def decode_complex_value(self, field_name: str, field: Any, value: Any) -> Any:
+                if field_name == "authentik_allowed_usernames" and isinstance(value, str):
+                    v = value.strip()
+                    if not v:
+                        return []
+                    if not v.startswith("["):
+                        return [u.strip() for u in v.split(",") if u.strip()]
+                return super().decode_complex_value(field_name, field, value)
+
+        return (init_settings, _EnvSource(settings_cls), dotenv_settings, file_secret_settings)
 
     model_config = SettingsConfigDict(
         env_ignore_empty=True,
