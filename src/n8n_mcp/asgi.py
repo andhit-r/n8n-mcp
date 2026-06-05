@@ -31,6 +31,6 @@ app = Starlette(
     routes=[
         Route("/health", health),
         Mount("/", app=_mcp_app),
-    ]
+    ],
 )
 logger.info("ASGI app siap (Streamable HTTP)")
